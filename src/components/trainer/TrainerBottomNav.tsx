@@ -5,9 +5,9 @@ import { LayoutGrid, Dumbbell, Users, MessageCircle } from 'lucide-react';
 
 const navItems = [
   { path: '/trainer', icon: LayoutGrid, label: 'Dashboard' },
-  { path: '/trainer/library', icon: Dumbbell, label: 'Exercícios' },
-  { path: '/trainer/students', icon: Users, label: 'Alunos' },
-  { path: '/trainer/messages', icon: MessageCircle, label: 'Mensagens' },
+  { path: '/trainer/library', icon: Dumbbell, label: 'Exercises' },
+  { path: '/trainer/students', icon: Users, label: 'Students' },
+  { path: '/trainer/messages', icon: MessageCircle, label: 'Messages' },
 ];
 
 export default function TrainerBottomNav() {
@@ -19,20 +19,9 @@ export default function TrainerBottomNav() {
         {navItems.map((item) => {
           const isActive = location.pathname === item.path ||
             (item.path !== '/trainer' && location.pathname.startsWith(item.path));
-
           return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={`fitness-nav-item relative flex-1 min-w-0 ${isActive ? 'active' : ''}`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="trainer-nav-indicator"
-                  className="absolute -top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
-                  transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }}
-                />
-              )}
+            <NavLink key={item.path} to={item.path} className={`fitness-nav-item relative flex-1 min-w-0 ${isActive ? 'active' : ''}`}>
+              {isActive && <motion.div layoutId="trainer-nav-indicator" className="absolute -top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }} />}
               <item.icon className="w-6 h-6" />
               <span className="text-xs font-medium">{item.label}</span>
             </NavLink>
