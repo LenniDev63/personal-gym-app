@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Camera, ChevronRight, LogOut, Bell, HelpCircle, FileText, Users, UserCheck, Activity, Moon, Sun } from 'lucide-react';
+import { Camera, ChevronRight, LogOut, Bell, HelpCircle, FileText, Users, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from 'next-themes';
@@ -9,10 +9,10 @@ import AvatarUpload from '@/components/AvatarUpload';
 import { Switch } from '@/components/ui/switch';
 
 const menuItems = [
-  { icon: Camera, label: 'Editar Perfil', path: '/trainer/profile/edit' },
-  { icon: Bell, label: 'Notificações', path: '/trainer/profile/notifications' },
-  { icon: HelpCircle, label: 'Ajuda & Suporte', path: '/trainer/profile/help' },
-  { icon: FileText, label: 'Termos de Uso', path: '/trainer/profile/terms' },
+  { icon: Camera, label: 'Edit Profile', path: '/trainer/profile/edit' },
+  { icon: Bell, label: 'Notifications', path: '/trainer/profile/notifications' },
+  { icon: HelpCircle, label: 'Help & Support', path: '/trainer/profile/help' },
+  { icon: FileText, label: 'Terms of Use', path: '/trainer/profile/terms' },
 ];
 
 export default function TrainerProfilePage() {
@@ -35,7 +35,7 @@ export default function TrainerProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <h1 className="fitness-page-title">Perfil</h1>
+        <h1 className="fitness-page-title">Profile</h1>
       </motion.div>
 
       {/* Profile Card */}
@@ -48,47 +48,25 @@ export default function TrainerProfilePage() {
         <AvatarUpload />
 
         <h2 className="text-xl font-bold text-foreground mb-1">
-          {user?.name || 'João Silva'}
+          {user?.name || 'John Smith'}
         </h2>
-        <p className="text-muted-foreground text-sm">{user?.email || 'joao@email.com'}</p>
+        <p className="text-muted-foreground text-sm">{user?.email || 'john@email.com'}</p>
       </motion.div>
 
-      {/* Stats Cards */}
+      {/* Stats Card - Only Total Students */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="grid grid-cols-3 gap-3 mb-6"
+        className="fitness-card text-center py-4 px-1 mb-6"
       >
-        <div className="fitness-card text-center py-4 px-1">
-          <div className="flex items-center justify-center mb-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Users className="w-4 h-4 text-primary" />
-            </div>
+        <div className="flex items-center justify-center mb-2">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Users className="w-4 h-4 text-primary" />
           </div>
-          <p className="text-xl font-bold text-foreground">64</p>
-          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Total Alunos</p>
         </div>
-
-        <div className="fitness-card text-center py-4 px-1">
-          <div className="flex items-center justify-center mb-2">
-            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-              <UserCheck className="w-4 h-4 text-green-500" />
-            </div>
-          </div>
-          <p className="text-xl font-bold text-foreground">52</p>
-          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Ativos</p>
-        </div>
-
-        <div className="fitness-card text-center py-4 px-1">
-          <div className="flex items-center justify-center mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Activity className="w-4 h-4 text-blue-500" />
-            </div>
-          </div>
-          <p className="text-xl font-bold text-foreground">92%</p>
-          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Engajamento</p>
-        </div>
+        <p className="text-xl font-bold text-foreground">52</p>
+        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Total Students</p>
       </motion.div>
 
       {/* Menu Items */}
@@ -127,7 +105,7 @@ export default function TrainerProfilePage() {
             ) : (
               <Sun className="w-5 h-5 text-muted-foreground" />
             )}
-            <span className="font-medium text-foreground">Modo Escuro</span>
+            <span className="font-medium text-foreground">Dark Mode</span>
           </div>
           <Switch
             checked={isDarkMode}
@@ -145,7 +123,7 @@ export default function TrainerProfilePage() {
         className="w-full fitness-button-danger-outline flex items-center justify-center gap-3"
       >
         <LogOut className="w-5 h-5" />
-        <span className="font-medium">Sair da Conta</span>
+        <span className="font-medium">Sign Out</span>
       </motion.button>
     </div>
   );

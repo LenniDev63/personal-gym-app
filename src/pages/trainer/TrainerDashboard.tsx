@@ -1,17 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Users, BarChart3, TrendingUp, ChevronRight, MessageCircle } from 'lucide-react';
+import { Bell, Users, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const upcomingRenewals = [
-  { id: 1, name: 'Lucas Silva', avatar: null, daysLeft: 3 },
-  { id: 2, name: 'Maria Santos', avatar: null, daysLeft: 1 },
-];
-
 const recentMessages = [
-  { id: 1, name: 'Daniel Smith', avatar: null, message: 'O novo plano de treino está intenso!', time: '10:45', unread: false },
-  { id: 2, name: 'Sarah Connor', avatar: null, message: 'Podemos remarcar para sexta?', time: 'Ontem', unread: true, unreadCount: 2 },
+  { id: 1, name: 'Daniel Smith', avatar: null, message: 'The new workout plan is intense!', time: '10:45', unread: false },
+  { id: 2, name: 'Sarah Connor', avatar: null, message: 'Can we reschedule to Friday?', time: 'Yesterday', unread: true, unreadCount: 2 },
 ];
 
 export default function TrainerDashboard() {
@@ -53,7 +48,7 @@ export default function TrainerDashboard() {
             )}
           </div>
           <div>
-            <p className="font-bold text-foreground">{user?.name || 'Carregando...'}</p>
+            <p className="font-bold text-foreground">{user?.name || 'Loading...'}</p>
           </div>
         </div>
         <button
@@ -72,7 +67,7 @@ export default function TrainerDashboard() {
         transition={{ delay: 0.1 }}
         className="fitness-page-title mb-6"
       >
-        Bem-vindo de volta, {user?.name?.split(' ')[1] || 'Coach'}!
+        Welcome back, {user?.name?.split(' ')[1] || 'Coach'}!
       </motion.h1>
 
       <motion.div
@@ -81,79 +76,26 @@ export default function TrainerDashboard() {
         animate="show"
         className="space-y-6"
       >
-        {/* Stats Cards */}
-        <motion.div variants={item} className="grid grid-cols-2 gap-4">
-          <div className="fitness-stat-card">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Users className="w-4 h-4 text-primary" />
-              <span className="text-sm">Alunos Ativos</span>
-            </div>
-            <div className="flex items-end justify-between">
-              <span className="text-3xl font-bold text-foreground">52</span>
-              <span className="text-xs text-primary font-medium flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +8% este mês
-              </span>
-            </div>
+        {/* Active Students Card */}
+        <motion.div variants={item} className="fitness-stat-card">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Users className="w-4 h-4 text-primary" />
+            <span className="text-sm">Active Students</span>
           </div>
-
-          <div className="fitness-stat-card">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <BarChart3 className="w-4 h-4 text-primary" />
-              <span className="text-sm">Progresso da Meta</span>
-            </div>
-            <div className="flex items-end justify-between">
-              <span className="text-3xl font-bold text-foreground">84%</span>
-              <span className="text-xs text-primary font-medium flex items-center gap-1">
-                ✓ No caminho
-              </span>
-            </div>
+          <div className="flex items-end justify-between">
+            <span className="text-3xl font-bold text-foreground">52</span>
           </div>
         </motion.div>
-
-        {/* Upcoming Renewals */}
-        <motion.section variants={item}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="fitness-section-title">Próximas Renovações</h2>
-            <button
-              onClick={() => navigate('/trainer/subscriptions')}
-              className="text-primary text-sm font-medium"
-            >
-              Ver todos
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {upcomingRenewals.map((student) => (
-              <div key={student.id} className="fitness-card flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {student.name.charAt(0)}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">{student.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Vence em {student.daysLeft} {student.daysLeft === 1 ? 'dia' : 'dias'}
-                  </p>
-                </div>
-                <button className={`fitness-button-${student.daysLeft <= 1 ? 'primary' : 'secondary'} py-2 px-4 text-sm`}>
-                  {student.daysLeft <= 1 ? 'Renovar' : 'Lembrar'}
-                </button>
-              </div>
-            ))}
-          </div>
-        </motion.section>
 
         {/* Recent Messages */}
         <motion.section variants={item}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="fitness-section-title">Mensagens Recentes</h2>
+            <h2 className="fitness-section-title">Recent Messages</h2>
             <button
               onClick={() => navigate('/trainer/messages')}
               className="text-primary text-sm font-medium"
             >
-              Caixa de Entrada
+              Inbox
             </button>
           </div>
 

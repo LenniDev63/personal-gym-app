@@ -8,9 +8,9 @@ export default function WelcomePage() {
   const navigate = useNavigate();
 
   const features = [
-    { icon: Dumbbell, label: 'Treinos' },
-    { icon: Users, label: 'Alunos' },
-    { icon: TrendingUp, label: 'Progresso' },
+    { icon: Dumbbell, label: 'Workouts' },
+    { icon: Users, label: 'Students' },
+    { icon: TrendingUp, label: 'Progress' },
   ];
 
   return (
@@ -42,9 +42,9 @@ export default function WelcomePage() {
           transition={{ delay: 0.2, duration: 0.4 }}
           className="text-3xl font-bold text-foreground mb-3"
         >
-          Seu Treino na
+          Your Training in
           <br />
-          Palma da Mão
+          the Palm of Your Hand
         </motion.h1>
 
         {/* Subtitle */}
@@ -54,7 +54,7 @@ export default function WelcomePage() {
           transition={{ delay: 0.3, duration: 0.4 }}
           className="text-muted-foreground mb-10 text-balance"
         >
-          A plataforma completa para Personal Trainers e seus alunos alcançarem resultados extraordinários.
+          The complete platform for Personal Trainers and their students to achieve extraordinary results.
         </motion.p>
 
         {/* Features */}
@@ -91,16 +91,16 @@ export default function WelcomePage() {
             onClick={() => navigate('/login')}
             className="w-full fitness-button-primary text-lg"
           >
-            Começar Agora
+            Get Started
           </button>
 
           <p className="text-muted-foreground">
-            Já tem uma conta?{' '}
+            Already have an account?{' '}
             <button
               onClick={() => navigate('/login')}
               className="text-primary font-semibold hover:underline"
             >
-              Entrar
+              Sign In
             </button>
           </p>
         </motion.div>

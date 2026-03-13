@@ -62,7 +62,7 @@ export default function LoginPage() {
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-fit mb-8"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span>Voltar</span>
+        <span>Back</span>
       </motion.button>
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
@@ -89,8 +89,8 @@ export default function LoginPage() {
               className="space-y-6"
             >
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-foreground mb-2">Como você quer usar?</h1>
-                <p className="text-muted-foreground">Selecione seu tipo de conta</p>
+                <h1 className="text-2xl font-bold text-foreground mb-2">How will you use it?</h1>
+                <p className="text-muted-foreground">Select your account type</p>
               </div>
 
               <button
@@ -102,7 +102,7 @@ export default function LoginPage() {
                 </div>
                 <div className="text-left flex-1">
                   <h3 className="font-semibold text-foreground text-lg">Personal Trainer</h3>
-                  <p className="text-muted-foreground text-sm">Gerencie alunos e treinos</p>
+                  <p className="text-muted-foreground text-sm">Manage students and workouts</p>
                 </div>
               </button>
 
@@ -114,8 +114,8 @@ export default function LoginPage() {
                   <GraduationCap className="w-7 h-7 text-primary" />
                 </div>
                 <div className="text-left flex-1">
-                  <h3 className="font-semibold text-foreground text-lg">Aluno</h3>
-                  <p className="text-muted-foreground text-sm">Acesse seus treinos e progresso</p>
+                  <h3 className="font-semibold text-foreground text-lg">Student</h3>
+                  <p className="text-muted-foreground text-sm">Access your workouts and progress</p>
                 </div>
               </button>
             </motion.div>
@@ -131,23 +131,23 @@ export default function LoginPage() {
             >
               <div className="text-center mb-6">
                 <div className="fitness-badge-primary mb-3 mx-auto w-fit">
-                  {role === 'trainer' ? 'Personal Trainer' : 'Aluno'}
+                  {role === 'trainer' ? 'Personal Trainer' : 'Student'}
                 </div>
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  {mode === 'login' ? 'Bem-vindo de volta!' : 'Criar sua conta'}
+                  {mode === 'login' ? 'Welcome back!' : 'Create your account'}
                 </h1>
                 <p className="text-muted-foreground">
-                  {mode === 'login' ? 'Entre com suas credenciais' : 'Preencha seus dados abaixo'}
+                  {mode === 'login' ? 'Enter your credentials' : 'Fill in your details below'}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === 'register' && (
                   <div>
-                    <label className="fitness-label">Nome completo</label>
+                    <label className="fitness-label">Full Name</label>
                     <input
                       type="text"
-                      placeholder="Seu nome"
+                      placeholder="Your name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="fitness-input"
@@ -157,12 +157,12 @@ export default function LoginPage() {
                 )}
 
                 <div>
-                  <label className="fitness-label">E-mail</label>
+                  <label className="fitness-label">Email</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="email"
-                      placeholder="seu@email.com"
+                      placeholder="your@email.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="fitness-input pl-12"
@@ -172,7 +172,7 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label className="fitness-label">Senha</label>
+                  <label className="fitness-label">Password</label>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
@@ -195,7 +195,7 @@ export default function LoginPage() {
 
                 {mode === 'login' && (
                   <button type="button" className="text-primary text-sm font-medium hover:underline">
-                    Esqueceu sua senha?
+                    Forgot your password?
                   </button>
                 )}
 
@@ -207,10 +207,10 @@ export default function LoginPage() {
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
                       <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                      Aguarde...
+                      Please wait...
                     </span>
                   ) : (
-                    mode === 'login' ? 'Entrar' : 'Criar conta'
+                    mode === 'login' ? 'Sign In' : 'Create Account'
                   )}
                 </button>
               </form>
@@ -221,7 +221,7 @@ export default function LoginPage() {
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">ou continue com</span>
+                  <span className="bg-background px-2 text-muted-foreground">or continue with</span>
                 </div>
               </div>
 
@@ -247,13 +247,13 @@ export default function LoginPage() {
               </div>
 
               <p className="text-center text-muted-foreground mt-6">
-                {mode === 'login' ? 'Não tem uma conta?' : 'Já tem uma conta?'}{' '}
+                {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
                 <button
                   type="button"
                   onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
                   className="text-primary font-semibold hover:underline"
                 >
-                  {mode === 'login' ? 'Criar conta' : 'Entrar'}
+                  {mode === 'login' ? 'Create Account' : 'Sign In'}
                 </button>
               </p>
             </motion.div>
