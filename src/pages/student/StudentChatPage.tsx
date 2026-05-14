@@ -1,55 +1,78 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, Smile, Plus, Video, Info } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Send } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-const mockMessages = [
-  { id: 1, text: 'Hey! How was leg day this morning? I noticed you hit your squat PR! 🏋️', sender: 'other', time: '09:15 AM' },
-  { id: 2, text: 'Great! The last set was tough, but I made it through.', sender: 'me', time: '09:18 AM' },
-  { id: 3, text: 'Amazing. Your form looked much more stable on today\'s video check. Remember to log the exact weights!', sender: 'other', time: '09:20 AM' },
-  { id: 4, text: 'Done! Already logged everything. Ready for tomorrow\'s cardio.', sender: 'me', time: '09:22 AM' },
-];
-
-const quickReplies = ['Thanks, coach!', 'I\'ll check now', 'Can we talk...'];
+interface Msg { id: string; sender_id: string; content: string; created_at: string; }
 
 export default function StudentChatPage() {
-  const [message, setMessage] = useState('');
+  const { user } = useAuth();
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [trainerName, setTrainerName] = useState('Coach');
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [input, setInput] = useState('');
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data: link } = await supabase.from('trainer_students').select('trainer_id').eq('student_id', user.id).eq('status', 'active').maybeSingle();
+      if (!link) return;
+      const { data: t } = await supabase.from('profiles').select('full_name, email').eq('id', link.trainer_id).maybeSingle();
+      setTrainerName(t?.full_name || t?.email || 'Coach');
+      const { data: conv } = await supabase.from('conversations').select('id').eq('trainer_id', link.trainer_id).eq('student_id', user.id).maybeSingle();
+      if (conv) setConversationId(conv.id);
+    })();
+  }, [user]);
+
+  useEffect(() => {
+    if (!conversationId) return;
+    let unsub: (() => void) | undefined;
+    (async () => {
+      const { data } = await supabase.from('messages').select('*').eq('conversation_id', conversationId).order('created_at');
+      setMessages((data ?? []) as Msg[]);
+      const channel = supabase.channel(`smsgs-${conversationId}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, (payload) => {
+        setMessages((prev) => [...prev, payload.new as Msg]);
+      }).subscribe();
+      unsub = () => { supabase.removeChannel(channel); };
+    })();
+    return () => unsub?.();
+  }, [conversationId]);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const send = async () => {
+    if (!input.trim() || !conversationId || !user) return;
+    const content = input.trim();
+    setInput('');
+    const { error } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_id: user.id, content });
+    if (error) toast.error(error.message);
+    await supabase.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', conversationId);
+  };
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 px-4 py-4 border-b border-border bg-card safe-area-top">
-        <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center relative"><span className="text-primary font-bold text-lg">A</span></div>
-        <div className="flex-1"><h2 className="font-semibold text-foreground">Coach Alex</h2><p className="text-xs text-primary font-medium">ONLINE NOW</p></div>
-        <button className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground"><Video className="w-5 h-5" /></button>
-        <button className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground"><Info className="w-5 h-5" /></button>
-      </motion.div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
-        <div className="flex justify-center"><span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">TUESDAY, OCT 24</span></div>
-        {mockMessages.map((msg) => (
-          <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] ${msg.sender === 'me' ? 'order-1' : 'order-2'}`}>
-              {msg.sender === 'other' && <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center mb-1"><span className="text-primary font-semibold text-xs">A</span></div>}
-              <div className={`rounded-2xl px-4 py-3 ${msg.sender === 'me' ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-card text-foreground rounded-bl-md shadow-card'}`}><p className="text-sm">{msg.text}</p></div>
-              <p className={`text-xs text-muted-foreground mt-1 ${msg.sender === 'me' ? 'text-right' : ''}`}>{msg.time} {msg.sender === 'me' && '✓✓'}</p>
-            </div>
-          </motion.div>
-        ))}
-        <div className="flex justify-center"><span className="text-xs text-primary bg-accent px-3 py-1 rounded-full font-medium">TODAY</span></div>
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-          {quickReplies.map((reply) => (
-            <button key={reply} onClick={() => setMessage(reply)} className="flex-shrink-0 bg-card border border-border rounded-full px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors">{reply}</button>
-          ))}
-        </div>
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-border bg-card safe-area-top">
+        <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center"><span className="text-primary font-bold text-lg">{trainerName.charAt(0)}</span></div>
+        <div className="flex-1"><h2 className="font-semibold text-foreground">{trainerName}</h2></div>
       </div>
-
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-32">
+        {!conversationId ? <p className="text-center text-muted-foreground text-sm">No trainer linked yet.</p> :
+          messages.length === 0 ? <p className="text-center text-muted-foreground text-sm">Send your first message.</p> :
+          messages.map((m) => (
+            <div key={m.id} className={`flex ${m.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${m.sender_id === user?.id ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-card text-foreground rounded-bl-md shadow-card'}`}>
+                <p className="text-sm">{m.content}</p>
+              </div>
+            </div>
+          ))}
+        <div ref={endRef} />
+      </div>
       <div className="fixed bottom-20 left-0 right-0 p-4 border-t border-border bg-card">
         <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground"><Plus className="w-5 h-5" /></button>
-          <div className="flex-1 relative">
-            <input type="text" placeholder="Type a message..." value={message} onChange={(e) => setMessage(e.target.value)} className="fitness-input pr-12" />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"><Smile className="w-5 h-5" /></button>
-          </div>
-          <button className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-button"><Send className="w-5 h-5 text-primary-foreground" /></button>
+          <input type="text" placeholder="Type a message..." value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} className="fitness-input flex-1" disabled={!conversationId} />
+          <button onClick={send} disabled={!conversationId} className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-button disabled:opacity-50"><Send className="w-5 h-5 text-primary-foreground" /></button>
         </div>
       </div>
     </div>
