@@ -1,19 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [formData, setFormData] = useState({
-    name: user?.name || 'John Smith',
-    email: user?.email || 'john@email.com',
-    bio: '',
-  });
+  const { user, profile, refreshProfile } = useAuth();
+  const [formData, setFormData] = useState({ name: '', email: '', bio: '' });
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => { navigate('/trainer/profile'); };
+  useEffect(() => {
+    if (profile) setFormData({ name: profile.full_name || '', email: profile.email || '', bio: profile.bio || '' });
+  }, [profile]);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase.from('profiles').update({ full_name: formData.name, bio: formData.bio }).eq('id', user.id);
+    setSaving(false);
+    if (error) { toast.error(error.message); return; }
+    await refreshProfile();
+    toast.success('Profile updated!');
+    navigate('/trainer/profile');
+  };
 
   return (
     <div className="px-4 py-6 safe-area-top min-h-screen bg-background">
@@ -25,8 +37,8 @@ export default function EditProfilePage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="fitness-card space-y-6">
         <div><label className="fitness-label">Full Name</label><input type="text" placeholder="Your name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="fitness-input" /></div>
         <div><label className="fitness-label">Email</label><input type="email" value={formData.email} disabled className="fitness-input bg-muted cursor-not-allowed" /><p className="text-xs text-primary mt-1.5">Email cannot be changed.</p></div>
-        <div><label className="fitness-label">Goal / Bio</label><textarea placeholder="What's your main goal? (E.g.: Hypertrophy, Weight Loss...)" value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} rows={4} className="fitness-input resize-none" /></div>
-        <button onClick={handleSave} className="w-full fitness-button-primary">Save Changes</button>
+        <div><label className="fitness-label">Goal / Bio</label><textarea placeholder="What's your main goal?" value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} rows={4} className="fitness-input resize-none" /></div>
+        <button onClick={handleSave} disabled={saving} className="w-full fitness-button-primary disabled:opacity-50">{saving ? 'Saving...' : 'Save Changes'}</button>
       </motion.div>
     </div>
   );
