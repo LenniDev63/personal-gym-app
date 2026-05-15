@@ -320,6 +320,7 @@ export type Database = {
         Row: {
           created_at: string
           day_of_week: string | null
+          duration_minutes: number | null
           id: string
           notes: string | null
           student_id: string
@@ -330,6 +331,7 @@ export type Database = {
         Insert: {
           created_at?: string
           day_of_week?: string | null
+          duration_minutes?: number | null
           id?: string
           notes?: string | null
           student_id: string
@@ -340,6 +342,7 @@ export type Database = {
         Update: {
           created_at?: string
           day_of_week?: string | null
+          duration_minutes?: number | null
           id?: string
           notes?: string | null
           student_id?: string
