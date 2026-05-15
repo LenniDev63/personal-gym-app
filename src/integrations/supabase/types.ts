@@ -193,6 +193,7 @@ export type Database = {
       student_details: {
         Row: {
           age: number | null
+          approval_status: string
           goal: string | null
           height_cm: number | null
           level: string | null
@@ -202,6 +203,7 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          approval_status?: string
           goal?: string | null
           height_cm?: number | null
           level?: string | null
@@ -211,6 +213,7 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          approval_status?: string
           goal?: string | null
           height_cm?: number | null
           level?: string | null
@@ -362,6 +365,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_trainer: { Args: { _user: string }; Returns: boolean }
       is_trainer_of: {
         Args: { _student: string; _trainer: string }
         Returns: boolean

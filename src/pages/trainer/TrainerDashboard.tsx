@@ -17,18 +17,24 @@ export default function TrainerDashboard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [activeStudents, setActiveStudents] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [recentMessages, setRecentMessages] = useState<RecentMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { count } = await supabase
-        .from('trainer_students')
+      const { count: approved } = await supabase
+        .from('student_details')
         .select('*', { count: 'exact', head: true })
-        .eq('trainer_id', user.id)
-        .eq('status', 'active');
-      setActiveStudents(count ?? 0);
+        .eq('approval_status', 'approved');
+      setActiveStudents(approved ?? 0);
+
+      const { count: pending } = await supabase
+        .from('student_details')
+        .select('*', { count: 'exact', head: true })
+        .eq('approval_status', 'pending');
+      setPendingCount(pending ?? 0);
 
       const { data: convs } = await supabase
         .from('conversations')
@@ -110,6 +116,21 @@ export default function TrainerDashboard() {
             <span className="text-3xl font-bold text-foreground">{activeStudents}</span>
           </div>
         </motion.div>
+
+        {pendingCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={() => navigate('/trainer/students')}
+            className="fitness-card flex items-center justify-between cursor-pointer hover:shadow-card-hover transition-all border-l-4 border-primary"
+          >
+            <div>
+              <p className="text-sm text-muted-foreground">Pending approvals</p>
+              <p className="text-2xl font-bold text-foreground">{pendingCount}</p>
+            </div>
+            <span className="text-primary text-sm font-medium">Review →</span>
+          </motion.div>
+        )}
 
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <div className="flex items-center justify-between mb-4">
