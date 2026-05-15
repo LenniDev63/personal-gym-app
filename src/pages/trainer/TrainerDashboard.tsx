@@ -17,18 +17,24 @@ export default function TrainerDashboard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [activeStudents, setActiveStudents] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [recentMessages, setRecentMessages] = useState<RecentMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { count } = await supabase
-        .from('trainer_students')
+      const { count: approved } = await supabase
+        .from('student_details')
         .select('*', { count: 'exact', head: true })
-        .eq('trainer_id', user.id)
-        .eq('status', 'active');
-      setActiveStudents(count ?? 0);
+        .eq('approval_status', 'approved');
+      setActiveStudents(approved ?? 0);
+
+      const { count: pending } = await supabase
+        .from('student_details')
+        .select('*', { count: 'exact', head: true })
+        .eq('approval_status', 'pending');
+      setPendingCount(pending ?? 0);
 
       const { data: convs } = await supabase
         .from('conversations')
