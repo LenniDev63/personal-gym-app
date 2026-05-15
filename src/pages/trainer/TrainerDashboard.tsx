@@ -117,6 +117,21 @@ export default function TrainerDashboard() {
           </div>
         </motion.div>
 
+        {pendingCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={() => navigate('/trainer/students')}
+            className="fitness-card flex items-center justify-between cursor-pointer hover:shadow-card-hover transition-all border-l-4 border-primary"
+          >
+            <div>
+              <p className="text-sm text-muted-foreground">Pending approvals</p>
+              <p className="text-2xl font-bold text-foreground">{pendingCount}</p>
+            </div>
+            <span className="text-primary text-sm font-medium">Review →</span>
+          </motion.div>
+        )}
+
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="fitness-section-title">Recent Messages</h2>
