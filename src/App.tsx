@@ -8,7 +8,6 @@ import { ThemeProvider } from "next-themes";
 
 import WelcomePage from "./pages/WelcomePage";
 import LoginPage from "./pages/LoginPage";
-import NotificationsHistoryPage from "./pages/NotificationsHistoryPage";
 import NotFound from "./pages/NotFound";
 
 import TrainerLayout from "./components/trainer/TrainerLayout";
