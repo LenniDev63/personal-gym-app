@@ -43,7 +43,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<WelcomePage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/notifications" element={<NotificationsHistoryPage />} />
+      
 
       <Route path="/trainer" element={<ProtectedRoute requiredRole="trainer"><TrainerLayout /></ProtectedRoute>}>
         <Route index element={<TrainerDashboard />} />
