@@ -84,9 +84,6 @@ export default function StudentWorkoutsPage() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
         <div><h1 className="fitness-page-title">My Workouts</h1><p className="text-muted-foreground text-sm">{weekDays[selectedDay].full}</p></div>
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate('/notifications')} className="w-10 h-10 rounded-full bg-card shadow-sm flex items-center justify-center relative active:scale-90 transition-transform">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-          </button>
           <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center"><span className="text-primary font-bold text-lg">{(profile?.full_name || profile?.email || 'S').charAt(0).toUpperCase()}</span></div>
         </div>
       </motion.div>
