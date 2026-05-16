@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Clock, Repeat, Check, ChevronRight, Timer, CheckCircle, Send, Bell, Moon, Sparkles } from 'lucide-react';
+import { Play, Clock, Repeat, Check, ChevronRight, Timer, CheckCircle, Send, Moon, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
