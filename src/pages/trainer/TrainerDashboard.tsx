@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,9 +97,6 @@ export default function TrainerDashboard() {
           </div>
           <div><p className="font-bold text-foreground">{displayName}</p></div>
         </div>
-        <button onClick={() => navigate('/notifications')} className="w-10 h-10 rounded-full bg-card shadow-card flex items-center justify-center relative active:scale-90 transition-transform">
-          <Bell className="w-5 h-5 text-muted-foreground" />
-        </button>
       </motion.div>
 
       <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="fitness-page-title mb-6">

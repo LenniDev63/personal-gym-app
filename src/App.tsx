@@ -8,7 +8,6 @@ import { ThemeProvider } from "next-themes";
 
 import WelcomePage from "./pages/WelcomePage";
 import LoginPage from "./pages/LoginPage";
-import NotificationsHistoryPage from "./pages/NotificationsHistoryPage";
 import NotFound from "./pages/NotFound";
 
 import TrainerLayout from "./components/trainer/TrainerLayout";
@@ -44,7 +43,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<WelcomePage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/notifications" element={<NotificationsHistoryPage />} />
+      
 
       <Route path="/trainer" element={<ProtectedRoute requiredRole="trainer"><TrainerLayout /></ProtectedRoute>}>
         <Route index element={<TrainerDashboard />} />

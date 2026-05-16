@@ -194,6 +194,7 @@ export type Database = {
         Row: {
           age: number | null
           approval_status: string
+          date_of_birth: string | null
           goal: string | null
           height_cm: number | null
           level: string | null
@@ -204,6 +205,7 @@ export type Database = {
         Insert: {
           age?: number | null
           approval_status?: string
+          date_of_birth?: string | null
           goal?: string | null
           height_cm?: number | null
           level?: string | null
@@ -214,6 +216,7 @@ export type Database = {
         Update: {
           age?: number | null
           approval_status?: string
+          date_of_birth?: string | null
           goal?: string | null
           height_cm?: number | null
           level?: string | null
