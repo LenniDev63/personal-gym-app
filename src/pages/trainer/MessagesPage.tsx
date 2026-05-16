@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
 import { Send, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-interface Conv { id: string; student_id: string; name: string; lastMessage: string; time: string; }
+interface Conv { id: string; partner_id: string; name: string; lastMessage: string; time: string; }
 interface Msg { id: string; sender_id: string; content: string; created_at: string; }
 
 export default function MessagesPage() {
@@ -18,21 +17,30 @@ export default function MessagesPage() {
 
   const loadConversations = async () => {
     if (!user) return;
-    const { data: convs } = await supabase.from('conversations').select('id, student_id, last_message_at').eq('trainer_id', user.id).order('last_message_at', { ascending: false });
-    if (!convs) return;
 
-    // ensure conversations exist for all linked students
-    const { data: links } = await supabase.from('trainer_students').select('student_id').eq('trainer_id', user.id).eq('status', 'active');
-    const existing = new Set(convs.map((c) => c.student_id));
-    const missing = (links ?? []).filter((l) => !existing.has(l.student_id));
-    for (const l of missing) {
-      await supabase.from('conversations').insert({ trainer_id: user.id, student_id: l.student_id });
+    // 1. Fetch all approved students globally (trainers are admins)
+    const { data: approved } = await supabase
+      .from('student_details').select('user_id').eq('approval_status', 'approved');
+    const studentIds = (approved ?? []).map((s) => s.user_id);
+
+    // 2. Existing conversations for this trainer
+    const { data: convs } = await supabase
+      .from('conversations').select('id, student_id, last_message_at')
+      .eq('trainer_id', user.id).order('last_message_at', { ascending: false });
+
+    // 3. Auto-create missing conversations
+    const existing = new Set((convs ?? []).map((c) => c.student_id));
+    const missing = studentIds.filter((id) => !existing.has(id));
+    if (missing.length > 0) {
+      await supabase.from('conversations').insert(missing.map((sid) => ({ trainer_id: user.id, student_id: sid })));
+      return loadConversations();
     }
-    if (missing.length > 0) return loadConversations();
+
+    if (!convs || convs.length === 0) { setConversations([]); return; }
 
     const ids = convs.map((c) => c.student_id);
     const { data: profs } = await supabase.from('profiles').select('id, full_name, email').in('id', ids);
-    const profMap = new Map(profs?.map((p) => [p.id, p]) ?? []);
+    const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
     const convIds = convs.map((c) => c.id);
     const { data: lastMsgs } = await supabase.from('messages').select('id, conversation_id, content, created_at').in('conversation_id', convIds).order('created_at', { ascending: false });
     const lastByConv = new Map<string, any>();
@@ -41,11 +49,26 @@ export default function MessagesPage() {
     setConversations(convs.map((c) => {
       const p = profMap.get(c.student_id);
       const m = lastByConv.get(c.id);
-      return { id: c.id, student_id: c.student_id, name: p?.full_name || p?.email || 'Student', lastMessage: m?.content || 'Start a conversation', time: m ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' };
+      return {
+        id: c.id,
+        partner_id: c.student_id,
+        name: p?.full_name || p?.email || 'Student',
+        lastMessage: m?.content || 'Start a conversation',
+        time: m ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+      };
     }));
   };
 
   useEffect(() => { loadConversations(); }, [user]);
+
+  // Realtime: refresh list when any message arrives
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase.channel(`trainer-msgs-${user.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => loadConversations())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user]);
 
   useEffect(() => {
     if (!selected) return;
@@ -53,9 +76,11 @@ export default function MessagesPage() {
     (async () => {
       const { data } = await supabase.from('messages').select('*').eq('conversation_id', selected.id).order('created_at');
       setMessages((data ?? []) as Msg[]);
-      const channel = supabase.channel(`msgs-${selected.id}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${selected.id}` }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as Msg]);
-      }).subscribe();
+      const channel = supabase.channel(`msgs-${selected.id}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${selected.id}` }, (payload) => {
+          setMessages((prev) => prev.some((m) => m.id === (payload.new as Msg).id) ? prev : [...prev, payload.new as Msg]);
+        })
+        .subscribe();
       unsub = () => { supabase.removeChannel(channel); };
     })();
     return () => unsub?.();
@@ -81,13 +106,14 @@ export default function MessagesPage() {
           <div className="flex-1"><h2 className="font-semibold text-foreground">{selected.name}</h2></div>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {messages.map((m) => (
-            <div key={m.id} className={`flex ${m.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${m.sender_id === user?.id ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-card text-foreground rounded-bl-md shadow-card'}`}>
-                <p className="text-sm">{m.content}</p>
+          {messages.length === 0 ? <p className="text-center text-muted-foreground text-sm">No messages yet. Say hi!</p> :
+            messages.map((m) => (
+              <div key={m.id} className={`flex ${m.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${m.sender_id === user?.id ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-card text-foreground rounded-bl-md shadow-card'}`}>
+                  <p className="text-sm whitespace-pre-wrap break-words">{m.content}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           <div ref={endRef} />
         </div>
         <div className="p-4 border-t border-border bg-card safe-area-bottom">
@@ -107,7 +133,7 @@ export default function MessagesPage() {
         <p className="text-muted-foreground text-sm mt-1">Chat with your students</p>
       </div>
       <div className="space-y-3">
-        {conversations.length === 0 ? <div className="fitness-card text-center py-12 text-muted-foreground">No conversations yet. Add students to start chatting.</div> :
+        {conversations.length === 0 ? <div className="fitness-card text-center py-12 text-muted-foreground">No approved students yet.</div> :
           conversations.map((c) => (
             <button key={c.id} onClick={() => setSelected(c)} className="w-full fitness-card flex items-center gap-4 text-left hover:shadow-card-hover transition-all">
               <div className="w-14 h-14 rounded-full bg-accent flex items-center justify-center"><span className="text-primary font-bold text-lg">{c.name.charAt(0)}</span></div>
