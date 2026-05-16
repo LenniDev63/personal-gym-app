@@ -24,7 +24,7 @@ export default function ExerciseLibrary() {
 
   const load = async () => {
     if (!user) return;
-    const { data } = await supabase.from('exercises').select('*').eq('trainer_id', user.id).order('created_at', { ascending: false });
+    const { data } = await supabase.from('exercises').select('*').order('created_at', { ascending: false });
     setExercises((data ?? []) as Exercise[]);
     setLoading(false);
   };
